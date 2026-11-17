@@ -1,0 +1,4 @@
+Configuration,Test Accuracy (%),Test Macro-F1 (%),Change vs. Full (%)
+Full Model (All 9 Channels: Total Acc + Body Acc + Gyro),91.86,91.95,+0.00%
+Ablation 1: Without Gyroscope (Channels 0–5: Acc Only),86.02,86.53,-5.84%
+Ablation 2: Without Total Acc (Channels 3–8: Body Acc + Gyro),90.26,90.32,-1.59%

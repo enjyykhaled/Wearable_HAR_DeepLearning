@@ -1,0 +1,5 @@
+Model,Params,Size (KB),Val Accuracy (%),Val Macro-F1 (%),Test Accuracy (%),Test Macro-F1 (%),Train Time (s),Inference (ms/win)
+1. Baseline: Random Forest (100 trees),N/A (Non-DL),N/A,92.95 ± 0.41,92.87 ± 0.40,83.49 ± 0.40,83.26 ± 0.43,1.56,0.013
+2. Classic DL: Bidirectional LSTM,"38,662",491.4,94.20 ± 0.75,94.06 ± 0.77,91.23 ± 0.98,91.36 ± 0.99,76.43,0.362
+3. Modern DL: Time-Series Transformer,"34,502",661.9,93.33 ± 0.74,93.26 ± 0.75,88.73 ± 0.85,88.69 ± 0.88,112.54,0.256
+4. Advanced Hybrid: 1D-CNN + Bi-LSTM + Custom Attn,"78,342",977.3,95.29 ± 0.43,95.24 ± 0.44,91.99 ± 0.94,92.13 ± 0.94,60.07,0.267
