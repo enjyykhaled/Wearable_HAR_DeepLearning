@@ -1,3 +1,0 @@
-Model,Val Accuracy (%),Val Macro-F1 (%),Test Accuracy (%),Test Macro-F1 (%),Train Time (s),Inference (ms/win)
-Baseline (Random Forest),92.95 ± 0.41,92.87 ± 0.40,83.49 ± 0.40,83.26 ± 0.43,1.56,0.0133
-"Classic Bi-LSTM (38,662 params)",94.20 ± 0.75,94.06 ± 0.77,91.23 ± 0.98,91.36 ± 0.99,76.43,0.3617

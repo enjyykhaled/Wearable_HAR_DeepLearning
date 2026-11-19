@@ -1,5 +1,0 @@
-Experiment,Parameters,Test Accuracy (%),Test Macro-F1 (%),Train Time (s)
-"Hyperparam: Bi-LSTM (32 units, Z-score)","11,142",90.4,90.57,51.47
-"Selected: Bi-LSTM (64 units, Z-score)","38,662",91.86,91.95,56.93
-"Hyperparam: Bi-LSTM (128 units, Z-score)","142,854",90.87,90.94,177.83
-"Data Strategy: Bi-LSTM (64 units, Raw Unscaled)","38,662",90.33,90.31,142.55
