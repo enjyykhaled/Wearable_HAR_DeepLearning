@@ -12,24 +12,32 @@ def build_transformer(
     dropout=0.2,
     lr=1e-3,
 ):
-    """Encoder-only Time-Series Transformer with learnable positional embeddings."""
+    """Build an encoder-only Transformer for time-series classification."""
+    # Create an input for sensor readings across time steps.
     inputs = layers.Input(shape=input_shape)
 
-    # Project 9 sensor channels to d_model dimension
+    # Project each sensor reading into the Transformer feature dimension.
     x = layers.Dense(d_model)(inputs)
 
-    # Learnable Positional Encoding
+    # Add a learnable embedding for each time step to represent position.
     positions = tf.range(start=0, limit=input_shape[0], delta=1)
-    pos_embedding = layers.Embedding(input_dim=input_shape[0], output_dim=d_model)(positions)
+    pos_embedding = layers.Embedding(
+        input_dim=input_shape[0],
+        output_dim=d_model,
+    )(positions)
     x = x + pos_embedding
 
-    # Multi-Head Self-Attention Block
+    # Let each time step attend to information from the other time steps.
     attn_out = layers.MultiHeadAttention(
-        num_heads=num_heads, key_dim=d_model // num_heads, dropout=dropout
+        num_heads=num_heads,
+        key_dim=d_model // num_heads,
+        dropout=dropout,
     )(x, x)
-    x = layers.LayerNormalization(epsilon=1e-6)(x + layers.Dropout(dropout)(attn_out))
+    x = layers.LayerNormalization(epsilon=1e-6)(
+        x + layers.Dropout(dropout)(attn_out)
+    )
 
-    # Position-wise Feed-Forward Network
+    # Process each time step with a feed-forward network.
     ffn = keras.Sequential(
         [
             layers.Dense(ff_dim, activation="relu"),
@@ -37,13 +45,15 @@ def build_transformer(
             layers.Dense(d_model),
         ]
     )
+    # Add the feed-forward output to the input and normalize it.
     x = layers.LayerNormalization(epsilon=1e-6)(x + ffn(x))
 
-    # Classification Head
+    # Pool the time-step features and predict a class for the sequence.
     x = layers.GlobalAveragePooling1D()(x)
     x = layers.Dropout(0.3)(x)
     outputs = layers.Dense(num_classes, activation="softmax")(x)
 
+    # Compile the model for multi-class classification.
     model = keras.Model(inputs, outputs, name="TimeSeries_Transformer")
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=lr, clipnorm=1.0),
