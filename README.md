@@ -32,31 +32,20 @@ Recognizing human physical activities from wearable sensors presents two core ch
 
 ## 📂 Repository Structure
 
-```text
 Wearable_HAR_DeepLearning/
-├── data/
-│   └── UCI HAR Dataset/                          # Raw inertial signals & subject labels (not tracked in Git)
+├── data/                       # download UCI HAR here (not tracked in Git)
 ├── notebooks/
-│   ├── eda_and_models.ipynb                      # Part 1: EDA, leakage-free splits, RF & Bi-LSTM baselines
-│   ├── 02_modern_and_advanced_models.ipynb       # Part 2: Transformer, Hybrid model & 4-model benchmark
-│   └── 03_hyperparameter_and_ablation_studies.ipynb # Part 3: Validation-only tuning, data & ablation studies
-├── src/
-│   └── models/
-│       └── custom_layers.py                      # Hand-written Keras TemporalAttentionLayer
-├── results/
-│   ├── final_4models_comparison.csv              # Unified 4-model validation & test metrics (Mean ± SD)
-│   ├── study_hyperparameters.csv                 # Bi-LSTM grid search logs (units × learning rate)
-│   ├── study_data_strategy.csv                   # Z-score vs. raw vs. Gaussian jitter augmentation logs
-│   └── study_ablation.csv                        # Sensor channel & hybrid component ablation logs
-├── checkpoints/
-│   ├── bilstm_har.keras                          # Saved Bi-LSTM model checkpoint
-│   ├── transformer_har.keras                     # Saved Time-Series Transformer checkpoint
-│   └── cnn_bilstm_attn_har.keras                 # Saved Hybrid model checkpoint
-├── demo/
-│   ├── app.py                                    # Interactive Streamlit inference & timeline visualization app
-│   └── input_utils.py                            # Preprocessing & 0.3 Hz gravity-removal helpers for CSV uploads
-├── requirements.txt                              # Python dependencies
-└── README.md                                     # Project documentation
+│   ├── eda_and_models.ipynb
+│   ├── 02_modern_and_advanced_models.ipynb
+│   └── 03_hyperparameter_and_ablation_studies.ipynb
+├── src/                        # data loader + model builders (list the real files)
+├── results/                    # CSV result tables, study_*.csv, error_analysis_summary.csv, figures
+├── saved_models/               # bilstm_har.keras, transformer_har.keras, cnn_bilstm_attn_har.keras
+├── demo/                       # app.py, input_utils.py (Streamlit)
+├── report/                     # MotionMindset_Report.pdf, MotionMindset_Slides.pptx
+├── contributions/              # individual contribution logs
+├── requirements.txt
+└── README.md
 ```
 
 ---
