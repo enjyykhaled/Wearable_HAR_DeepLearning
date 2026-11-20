@@ -45,8 +45,6 @@ Wearable_HAR_DeepLearning/
 ├── contributions/              # individual contribution logs
 ├── requirements.txt
 └── README.md
-```
-
 ---
 
 ## 🚀 Installation & Quick Start
