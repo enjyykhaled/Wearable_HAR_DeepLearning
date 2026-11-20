@@ -1,0 +1,4 @@
+Experiment,Parameters,Val Accuracy (%),Val Macro-F1 (%),Train Time (s)
+Z-score (baseline strategy),38662,94.20 ± 0.75,94.06 ± 0.77,133.1
+Raw unscaled,38662,94.90 ± 0.22,94.73 ± 0.23,270.4
+Z-score + jitter augmentation (sigma=0.05),38662,94.30 ± 0.59,94.13 ± 0.60,242.1

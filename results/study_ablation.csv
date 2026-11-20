@@ -1,0 +1,8 @@
+Experiment,Parameters,Val Accuracy (%),Val Macro-F1 (%),Train Time (s)
+Bi-LSTM | Full (9 ch),38662,94.20 ± 0.75,94.06 ± 0.77,145.6
+Bi-LSTM | Without gyroscope,37126,94.32 ± 0.45,94.18 ± 0.42,123.5
+Bi-LSTM | Without total acc,37126,83.57 ± 1.46,83.22 ± 1.56,311.2
+Bi-LSTM | Without body acc,37126,92.57 ± 0.56,92.48 ± 0.56,215.2
+Hybrid | full (CNN + BiLSTM + Attention),78342,95.29 ± 0.43,95.14 ± 0.45,129.8
+Hybrid | without attention (GAP),70022,94.78 ± 0.28,94.63 ± 0.29,87.2
+Hybrid | without CNN,46982,95.01 ± 0.19,94.84 ± 0.18,182.7
