@@ -31,7 +31,6 @@ Recognizing human physical activities from wearable sensors presents two core ch
 ---
 
 ## 📂 Repository Structure
-
 Wearable_HAR_DeepLearning/
 ├── data/                       # download UCI HAR here (not tracked in Git)
 ├── notebooks/
