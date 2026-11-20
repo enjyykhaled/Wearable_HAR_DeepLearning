@@ -1,81 +1,59 @@
-# Wearable Human Activity Recognition — Motion Mindset
+# Wearable Human Activity Recognition (HAR): Deep Learning Technical Report
 
-**Course:** Deep Learning (AI403) — Fall 2026, Pharos University in Alexandria (Faculty of Computer Science & AI)
-**Instructor:** Dr. Sahar Ghanem  |  **Idea chosen:** #9 — Wearable human activity recognition  |  **Team:** Motion Mindset
+## 1. Data Pipeline & Integrity Verification
 
-| Member | ID | Main role |
-|---|---|---|
-| Engy Khaled (Team Lead) | 202302900 | Advanced hybrid model |
-| Habiba Abdulhameed | 202301140 | Bi-LSTM model, dataset scaling |
-| Rahaf Mohamed | 202301923 | Transformer, hyperparameters, error analysis |
-| Hana Yasser | 202302665 | Random Forest baseline, preprocessing, EDA |
+* **Dataset:** UCI Human Activity Recognition (HAR) Using Smartphones, comprising **9 inertial sensor channels** (Body Acceleration X/Y/Z, Angular Velocity/Gyroscope X/Y/Z, and Total Acceleration X/Y/Z) sampled at **50 Hz** into **128-step sliding windows**.
+* **Leakage-Free Subject-Wise Split:** To prevent temporal data leakage caused by overlapping windows from the same individual, the dataset ($10,299$ total windows across 6 activities) was strictly partitioned by subject:
+  * **Train Set:** $6,037$ windows ($17$ subjects)
+  * **Validation Set:** $1,315$ windows ($4$ held-out subjects: $1, 3, 5, 6$)
+  * **Test Set:** $2,947$ windows ($9$ held-out subjects)
+* **Preprocessing:** Zero missing/NaN values and zero subject overlap were verified. Z-score standardization ($\mu = 0, \sigma = 1$) was computed strictly on the training set before transforming validation and test tensors.
+* **Class Distribution:** Balanced across all six activities:
+  * `LAYING` ($18.88\%$)
+  * `STANDING` ($18.51\%$)
+  * `SITTING` ($17.25\%$)
+  * `WALKING` ($16.72\%$)
+  * `WALKING_UPSTAIRS` ($14.99\%$)
+  * `WALKING_DOWNSTAIRS` ($13.65\%$)
 
-## 1. Task and best result
-Classify 2.56 s smartphone inertial windows (128 steps × 9 channels, 50 Hz) into 6 activities.
-Best model: **1D-CNN + Bi-LSTM + custom temporal attention** — test accuracy **91.99 ± 0.94 %**, macro-F1 **92.13 ± 0.94 %** (3 seeds).
+---
 
-| Model | Test Acc (%) | Test Macro-F1 (%) |
-|---|---|---|
-| Random Forest (baseline) | 83.49 ± 0.40 | 83.26 ± 0.43 |
-| Bi-LSTM | 91.23 ± 0.98 | 91.36 ± 0.99 |
-| Time-Series Transformer | 88.73 ± 0.85 | 88.69 ± 0.88 |
-| CNN + Bi-LSTM + Attention | 91.99 ± 0.94 | 92.13 ± 0.94 |
+## 2. Evaluated Model Architectures
 
-Full table (parameters, size, times): `results/final_4models_comparison.csv`.
+All deep learning models were trained using an identical protocol: **Adam optimizer** ($\text{lr} = 10^{-3}$, $\text{clipnorm} = 1.0$), `sparse_categorical_crossentropy`, $\text{batch\_size} = 64$, up to **$40$ epochs** with `EarlyStopping(monitor="val_loss", patience=8, restore_best_weights=True)`, evaluated across **3 random seeds (`42, 123, 2026`)**.
 
-## 2. Environment setup
-Python 3.9+ (the saved models were built with TensorFlow/Keras, see `requirements.txt`).
-```bash
-pip install -r requirements.txt
-```
+1. **Baseline: Random Forest (100 trees)** — Non-deep learning tabular baseline.
+2. **Classic DL: Bidirectional LSTM** — Single Bi-LSTM layer ($64$ units, $\text{dropout} = 0.2$) followed by `Dropout(0.3)` and a 6-class Softmax head.
+3. **Modern DL: Time-Series Transformer** — Dense channel projection ($d_{\text{model}} = 64$) + learnable positional embeddings + 1 Transformer Encoder block ($4$ heads, $d_{\text{ff}} = 128$, $\text{dropout} = 0.2$, residual LayerNorm connections) + `GlobalAveragePooling1D`.
+4. **Advanced Hybrid: 1D-CNN + Bi-LSTM + Custom Attention**:
+   * **Local Feature Extraction:** `Conv1D(64, kernel_size=5, padding="same", activation="relu")` $\rightarrow$ `BatchNormalization` $\rightarrow$ `MaxPooling1D(2)` $\rightarrow$ `Dropout(0.2)`.
+   * **Sequence Modeling:** `Bidirectional(LSTM(64, return_sequences=True, dropout=0.2))`.
+   * **Dynamic Time-Step Weighting:** Hand-written `TemporalAttentionLayer(attention_dim=64)` imported from `src/models/custom_layers.py` $\rightarrow$ `Dropout(0.3)` $\rightarrow$ `Dense(6, softmax)`.
 
-## 3. Dataset (UCI HAR) — download and preprocessing
-The raw dataset is **not** stored in the repository.
-```bash
-python data/download.py                 # downloads and extracts to data/UCI HAR Dataset/
-python src/datasets/loader.py           # builds the splits, prints shapes (sanity check)
-```
-* Source: UCI Machine Learning Repository, *Human Activity Recognition Using Smartphones* (Anguita et al., ESANN 2013). Check the licence/terms on the dataset page.
-* Split (subject-wise, no leakage): official train subjects minus validation subjects 1, 3, 5, 6 → train (17 subjects) / validation (4 subjects); the official 9 test subjects are used only for final evaluation.
-* Z-score statistics are computed on the training partition only.
+---
 
-## 4. Training and evaluation
-Training and evaluation are run from the notebooks (model builders live in `src/models/`):
+## 3. Unified 4-Model Benchmark Comparison (Mean ± SD)
 
-| Step | Where |
-|---|---|
-| EDA, data pipeline, Random Forest baseline, Bi-LSTM (3 seeds) | `notebooks/eda_and_models.ipynb` |
-| Transformer, advanced hybrid, final 4-model comparison (3 seeds) | `notebooks/02_modern_and_advanced_models.ipynb` |
-| Hyperparameter study, data-strategy study, ablation, error analysis | `notebooks/<ADD NOTEBOOK NAME>.ipynb`  ← **TODO: add the notebook that produced `results/hyperparam_and_data_study.csv`, `ablation_study.csv`, `error_analysis_summary.csv`** |
+| Model | Params | Size (KB) | Val Accuracy (%) | Val Macro-F1 (%) | Test Accuracy (%) | Test Macro-F1 (%) | Train Time (s) | Inference (ms/win) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **1. Baseline: Random Forest (100 trees)** | N/A | N/A | $92.95 \pm 0.41$ | $92.87 \pm 0.40$ | $83.49 \pm 0.40$ | $83.26 \pm 0.43$ | $1.56$ | $0.013$ |
+| **2. Classic DL: Bidirectional LSTM** | $38,662$ | $491.4$ | $94.20 \pm 0.75$ | $94.06 \pm 0.77$ | $91.23 \pm 0.98$ | $91.36 \pm 0.99$ | $76.43$ | $0.362$ |
+| **3. Modern DL: Time-Series Transformer** | $34,502$ | $661.9$ | $93.33 \pm 0.74$ | $93.26 \pm 0.75$ | $88.73 \pm 0.85$ | $88.69 \pm 0.88$ | $112.54$ | $0.256$ |
+| **4. Advanced Hybrid: 1D-CNN + Bi-LSTM + Custom Attn** | $78,342$ | $977.3$ | **$95.29 \pm 0.43$** | **$95.24 \pm 0.44$** | **$91.99 \pm 0.94$** | **$92.13 \pm 0.94$** | $60.07$ | $0.267$ |
 
-Run order: `eda_and_models.ipynb` → `02_modern_and_advanced_models.ipynb` → the study notebook. Seeds: 42, 123, 2026.
-Outputs: `results/*.csv`, `results/*.png`, `saved_models/*.keras`.
+### Key Findings from Benchmark
 
-## 5. Live demo
-```bash
-streamlit run demo/app.py
-```
-Two input modes: (a) a window from the held-out test subjects, (b) **your own CSV** — 9 columns in UCI order, or 6 columns (total-acc xyz + gyro xyz, body-acc derived by gravity removal), ≥128 rows at 50 Hz. Sample CSV files can be downloaded from the app sidebar.
+* **Generalization Gap:** Random Forest achieved strong validation accuracy ($92.95\%$) but dropped sharply to **$83.49\%$** on unseen test subjects. All three deep learning architectures generalized significantly better across unseen subjects.
+* **Top Performer & Efficiency:** The **Advanced Hybrid** achieved the highest validation accuracy (**$95.29\%$**), highest test accuracy (**$91.99\%$**), and highest test Macro-F1 (**$92.13\%$**). Moreover, because `MaxPooling1D(2)` halved the sequence length from $128$ to $64$ before the Bi-LSTM, it trained faster (**$60.07\text{s}$**) than both the standalone Bi-LSTM (**$76.43\text{s}$**) and the Transformer (**$112.54\text{s}$**).
+* **Transformer vs. Recurrent Hybrids:** Without convolutional inductive bias for local high-frequency sensor motifs, the lightweight Transformer ($88.73\%$ test accuracy) trailed both the Classic Bi-LSTM ($91.23\%$) and Advanced Hybrid ($91.99\%$) on this $6,037$-window dataset.
 
-## 6. Hardware and expected runtimes
-* Hardware: **TODO — CPU model / GPU / RAM / OS used for training and timing**
-* Per-model training time and inference latency: see `results/final_4models_comparison.csv` (e.g. hybrid ≈ 60 s training, ≈ 0.27 ms/window inference).
-* All neural checkpoints are < 1 MiB (`saved_models/`).
+---
 
-## 7. Large files
-* Checkpoints / extra files: **TODO — shared drive link**
+## 4. Validation-Only Ablation & Tuning Protocol (Part 3)
 
-## 8. Repository layout
-```
-README.md  requirements.txt
-data/        download script only (no raw data)
-src/datasets/ loader and split        src/models/ model builders + custom attention layer
-notebooks/   experiments              results/ CSV tables and figures
-saved_models/ trained checkpoints     demo/ Streamlit app (+ input_utils.py)
-report/      report and slides        contributions/ individual logs
-```
+`Part 3` isolates all design decisions strictly on the **validation set** (leaving the $9$ test subjects completely untouched to prevent selection bias) across $4$ controlled experiments:
 
-## 9. Credits
-* UCI HAR dataset — Anguita et al., ESANN 2013.
-* Architectures: Hochreiter & Schmidhuber (1997, LSTM), Vaswani et al. (2017, Transformer), Bahdanau et al. (2014, additive attention).
-* Libraries: TensorFlow/Keras, scikit-learn, Streamlit, Plotly. The temporal-attention layer (`src/models/custom_layers.py`) was written by the team.
+1. **Hyperparameter Grid (Bi-LSTM):** Evaluates hidden units $\in \{32, 64, 128\} \times$ learning rates $\in \{10^{-3}, 3\times 10^{-4}\}$ (`study_hyperparameters.csv`).
+2. **Data Strategy (Bi-LSTM, 64 units):** Compares train-only Z-score scaling, raw unscaled inputs, and Z-score + Gaussian jitter augmentation ($\sigma = 0.05$, doubling training samples) (`study_data_strategy.csv`).
+3. **Sensor Channel Ablation (H3):** Evaluates dropping Gyroscope `[3,4,5]`, Total Acceleration `[6,7,8]`, or Body Acceleration `[0,1,2]` against the full 9-channel input (`study_ablation.csv`).
+4. **Hybrid Component Ablation (H2):** Tests removing the custom `TemporalAttentionLayer` (replacing it with `GlobalAveragePooling1D`) and removing the `1D-CNN` front-end (`study_ablation.csv`).
