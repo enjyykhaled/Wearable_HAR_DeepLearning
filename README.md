@@ -31,21 +31,23 @@ Recognizing human physical activities from wearable sensors presents two core ch
 ---
 
 ## 📂 Repository Structure
+
+```text
 Wearable_HAR_DeepLearning/
-├── data/                       # download UCI HAR here (not tracked in Git)
+├── data/                  # download UCI HAR here (not tracked in Git)
 ├── notebooks/
 │   ├── eda_and_models.ipynb
 │   ├── 02_modern_and_advanced_models.ipynb
 │   └── 03_hyperparameter_and_ablation_studies.ipynb
-├── src/                        # data loader + model builders (list the real files)
-├── results/                    # CSV result tables, study_*.csv, error_analysis_summary.csv, figures
-├── saved_models/               # bilstm_har.keras, transformer_har.keras, cnn_bilstm_attn_har.keras
-├── demo/                       # app.py, input_utils.py (Streamlit)
-├── report/                     # MotionMindset_Report.pdf, MotionMindset_Slides.pptx
-├── contributions/              # individual contribution logs
+├── src/                   # data loader + model builders
+├── results/               # result CSVs, study_*.csv, error_analysis_summary.csv, figures
+├── saved_models/          # bilstm_har.keras, transformer_har.keras, cnn_bilstm_attn_har.keras
+├── demo/                  # app.py, input_utils.py (Streamlit)
+├── report/                # MotionMindset_Report.pdf, MotionMindset_Slides.pptx
+├── contributions/         # individual contribution logs
 ├── requirements.txt
 └── README.md
----
+```
 
 ## 🚀 Installation & Quick Start
 
